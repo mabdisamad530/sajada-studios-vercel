@@ -1398,18 +1398,6 @@ function submitOrder() {
   var notes   = document.getElementById('oNotes').value.trim();
   var occasion= document.getElementById('oOccasion').value;
 
-  // Encode all order details into metadata string (max 500 chars for Stripe)
-  var orderRef = [
-    'color:' + color,
-    names.length   ? 'names:'   + names.join(',')  : '',
-    syms.length    ? 'syms:'    + syms.join(',')    : '',
-    'thread:'      + thread,
-    phone          ? 'phone:'   + phone              : '',
-    address        ? 'addr:'    + address            : '',
-    occasion       ? 'occ:'     + occasion           : '',
-    notes          ? 'notes:'   + notes              : ''
-  ].filter(Boolean).join('|').substring(0, 500);
-
   // Disable button and show loading state
   var btn = document.getElementById('oSubmit');
   var originalText = btn.textContent;
@@ -1420,12 +1408,22 @@ function submitOrder() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      priceId:    priceId,
-      email:      email,
-      orderRef:   orderRef,
+      priceId:      priceId,
+      email:        email,
       customerName: name,
-      successUrl: window.location.origin + window.location.pathname + '?order=success',
-      cancelUrl:  window.location.origin + window.location.pathname + '?order=cancelled'
+      matName1:     names[0] || '',
+      matName2:     names[1] || '',
+      matName3:     names[2] || '',
+      matName4:     names[3] || '',
+      symbol:       syms.join(', '),
+      color:        color,
+      address:      address,
+      phone:        phone,
+      thread:       thread,
+      occasion:     occasion,
+      notes:        notes,
+      successUrl:   window.location.origin + window.location.pathname + '?order=success',
+      cancelUrl:    window.location.origin + window.location.pathname + '?order=cancelled'
     })
   })
   .then(function(r) {
