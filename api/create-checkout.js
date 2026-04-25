@@ -9,7 +9,6 @@ module.exports = async function handler(req, res) {
     const {
       priceId,
       email,
-      orderRef,
       customerName,
       matName1,
       matName2,
@@ -18,7 +17,10 @@ module.exports = async function handler(req, res) {
       symbol,
       color,
       address,
-      quantity,
+      phone,
+      thread,
+      occasion,
+      notes,
       successUrl,
       cancelUrl
     } = req.body;
@@ -27,21 +29,24 @@ module.exports = async function handler(req, res) {
       payment_method_types: ['card'],
       mode: 'payment',
       customer_email: email,
-      line_items: [{ price: priceId, quantity: quantity || 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
       metadata: {
         customerName: customerName || '',
-        orderRef: orderRef || '',
-        matName1: matName1 || '',
-        matName2: matName2 || '',
-        matName3: matName3 || '',
-        matName4: matName4 || '',
-        symbol: symbol || '',
-        color: color || '',
-        address: address || ''
+        matName1:     matName1 || '',
+        matName2:     matName2 || '',
+        matName3:     matName3 || '',
+        matName4:     matName4 || '',
+        symbol:       symbol || '',
+        color:        color || '',
+        address:      address || '',
+        phone:        phone || '',
+        thread:       thread || '',
+        occasion:     occasion || '',
+        notes:        (notes || '').substring(0, 100)
       },
-      success_url: successUrl || `${req.headers.origin}/success.html`,
-      cancel_url: cancelUrl || `${req.headers.origin}/`
+      success_url: successUrl || `${req.headers.origin}/`,
+      cancel_url:  cancelUrl  || `${req.headers.origin}/`
     });
 
     return res.status(200).json({ url: session.url });
