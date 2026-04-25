@@ -1,36 +1,31 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Vercel requires raw body for webhook signature verification
-export const config = {
-  api: {
-    bodyParser: false
-  }
-};
-
-async function getRawBody(req) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    req.on('data', chunk => chunks.push(chunk));
-    req.on('end', () => resolve(Buffer.concat(chunks)));
-    req.on('error', reject);
-  });
-}
-
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
   }
 
-  const rawBody = await getRawBody(req);
   const sig = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const airtableToken = process.env.AIRTABLE_TOKEN;
+  const airtableBaseId = process.env.AIRTABLE_BASE_ID;
+
+  // Log env var presence for debugging
+  console.log('ENV CHECK - webhook secret present:', !!webhookSecret);
+  console.log('ENV CHECK - airtable token present:', !!airtableToken);
+  console.log('ENV CHECK - airtable token prefix:', airtableToken ? airtableToken.substring(0, 6) : 'MISSING');
+  console.log('ENV CHECK - base id present:', !!airtableBaseId);
+
+  let rawBody = '';
+  await new Promise((resolve, reject) => {
+    req.on('data', chunk => { rawBody += chunk; });
+    req.on('end', resolve);
+    req.on('error', reject);
+  });
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(
-      rawBody,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
+    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature failed:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -41,47 +36,44 @@ module.exports = async function handler(req, res) {
     const meta = session.metadata || {};
 
     const fields = {
-      'Order Ref':       meta.orderRef || session.id,
-      'Customer Name':   meta.customerName || '',
-      'Email':           session.customer_email || '',
-      'Amount Paid':     (session.amount_total / 100).toFixed(2),
-      'Currency':        (session.currency || 'usd').toUpperCase(),
-      'Mat Name 1':      meta.matName1 || '',
-      'Mat Name 2':      meta.matName2 || '',
-      'Mat Name 3':      meta.matName3 || '',
-      'Mat Name 4':      meta.matName4 || '',
-      'Symbol':          meta.symbol || '',
-      'Color':           meta.color || '',
+      'Order Ref':        meta.orderRef || session.id,
+      'Customer Name':    meta.customerName || '',
+      'Email':            session.customer_email || '',
+      'Amount Paid':      parseFloat((session.amount_total / 100).toFixed(2)),
+      'Currency':         (session.currency || 'usd').toUpperCase(),
+      'Mat Name 1':       meta.matName1 || '',
+      'Mat Name 2':       meta.matName2 || '',
+      'Mat Name 3':       meta.matName3 || '',
+      'Mat Name 4':       meta.matName4 || '',
+      'Symbol':           meta.symbol || '',
+      'Color':            meta.color || '',
       'Shipping Address': meta.address || '',
-      'Payment Status':  session.payment_status || '',
-      'Stripe Session':  session.id,
-      'Created At':      new Date().toISOString()
+      'Payment Status':   session.payment_status || '',
+      'Stripe Session':   session.id,
+      'Created At':       new Date().toISOString()
     };
 
-    try {
-      const airtableRes = await fetch(
-        `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Orders`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${process.env.AIRTABLE_TOKEN}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ fields })
-        }
-      );
+    const url = `https://api.airtable.com/v0/${airtableBaseId}/Orders`;
+    console.log('Posting to Airtable URL:', url);
 
-      if (!airtableRes.ok) {
-        const errText = await airtableRes.text();
-        console.error('Airtable error:', errText);
-        return res.status(500).send('Airtable write failed');
-      }
+    const airtableRes = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${airtableToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ fields })
+    });
 
-      console.log('Order logged to Airtable:', fields['Order Ref']);
-    } catch (err) {
-      console.error('Airtable fetch error:', err.message);
-      return res.status(500).send('Airtable request failed');
+    const responseText = await airtableRes.text();
+    console.log('Airtable response status:', airtableRes.status);
+    console.log('Airtable response body:', responseText);
+
+    if (!airtableRes.ok) {
+      return res.status(500).send('Airtable write failed');
     }
+
+    console.log('Order logged successfully:', fields['Order Ref']);
   }
 
   return res.status(200).json({ received: true });
