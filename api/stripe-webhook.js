@@ -36,7 +36,7 @@ module.exports = async function handler(req, res) {
     const meta = session.metadata || {};
 
     const fields = {
-      'Order Ref':        meta.orderRef || session.id,
+      'Order Ref':        session.id,
       'Customer Name':    meta.customerName || '',
       'Email':            session.customer_email || '',
       'Amount Paid':      parseFloat((session.amount_total / 100).toFixed(2)),
@@ -48,6 +48,10 @@ module.exports = async function handler(req, res) {
       'Symbol':           meta.symbol || '',
       'Color':            meta.color || '',
       'Shipping Address': meta.address || '',
+      'Phone':            meta.phone || '',
+      'Thread Color':     meta.thread || '',
+      'Occasion':         meta.occasion || '',
+      'Notes':            meta.notes || '',
       'Payment Status':   session.payment_status || '',
       'Stripe Session':   session.id,
       'Created At':       new Date().toISOString()
