@@ -52,6 +52,7 @@ module.exports = async function handler(req, res) {
       'Thread Color':     meta.thread || '',
       'Occasion':         meta.occasion || '',
       'Notes':            meta.notes || '',
+      'Tasbih':           meta.tasbih === 'yes' ? 'Yes' : 'No',
       'Payment Status':   session.payment_status || '',
       'Stripe Session':   session.id,
       'Created At':       new Date().toISOString()
