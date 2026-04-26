@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -923,13 +923,17 @@ footer{background:var(--deep);border-top:1px solid rgba(201,168,76,.1);padding:3
           </div>
           <div class="ofield">
             <label>Mat Color</label>
+            <!-- Real photo preview -->
+            <div id="matPhotoWrap" style="width:100%;margin-bottom:.9rem;border:1px solid rgba(201,168,76,.18);overflow:hidden;background:#0D0A0B;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;">
+              <img id="matPhoto" src="/mat-black.jpeg" alt="Selected mat color" style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity .25s;" />
+            </div>
             <div class="mcols">
-              <div><div class="mcol on" data-val="Black" style="background:radial-gradient(circle at 35% 35%,#2a2a2a,#080808);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Black</span></div>
-              <div><div class="mcol" data-val="Grey" style="background:radial-gradient(circle at 35% 35%,#9a9a9a,#555555);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Grey</span></div>
-              <div><div class="mcol" data-val="Green" style="background:radial-gradient(circle at 35% 35%,#2aaa80,#0d5c42);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Green</span></div>
-              <div><div class="mcol" data-val="Blue" style="background:radial-gradient(circle at 35% 35%,#2244cc,#0a1866);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Blue</span></div>
-              <div><div class="mcol" data-val="Pink" style="background:radial-gradient(circle at 35% 35%,#c47a8a,#7a3a48);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Pink</span></div>
-              <div><div class="mcol" data-val="Red" style="background:radial-gradient(circle at 35% 35%,#e85060,#6a0a14);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Red</span></div>
+              <div><div class="mcol on" data-val="Black" data-photo="/mat-black.jpeg" style="background:radial-gradient(circle at 35% 35%,#2a2a2a,#080808);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Black</span></div>
+              <div><div class="mcol" data-val="Grey-Purple" data-photo="/mat-grey-purple.jpeg" style="background:radial-gradient(circle at 35% 35%,#8a7a98,#4a3a58);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Grey Purple</span></div>
+              <div><div class="mcol" data-val="Pink" data-photo="/mat-pink.jpeg" style="background:radial-gradient(circle at 35% 35%,#c47a8a,#7a3a48);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Pink</span></div>
+              <div><div class="mcol" data-val="Deyal Purple" data-photo="/mat-deyal-purple.jpeg" style="background:radial-gradient(circle at 35% 35%,#7030a0,#3a0060);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Deyal Purple</span></div>
+              <div><div class="mcol" data-val="Royal Blue" data-photo="/mat-royal-blue.jpeg" style="background:radial-gradient(circle at 35% 35%,#1a3a8a,#0a1a50);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Royal Blue</span></div>
+              <div><div class="mcol" data-val="Burgundy" data-photo="/mat-burgundy.jpeg" style="background:radial-gradient(circle at 35% 35%,#8a1a1a,#500808);" onclick="selectModalColor(this)"></div><span class="mcol-lbl">Burgundy</span></div>
             </div>
           </div>
           <div class="ofield">
@@ -1163,7 +1167,8 @@ function setColBlack(ev) {
 
 // ── ORDER MODAL ───────────────────────────────────────
 var currentStep = 1;
-var basePrices  = { 'single': 40, 'duo': 80, 'family': 160, 'tesbih': 50 };
+// MUST match backend BASE_PRICES exactly
+var basePrices  = { 'single': 35, 'duo': 80, 'family': 110, 'tesbih': 50 };
 var matCounts   = { 'single': 1,  'duo': 2,  'family': 4,   'tesbih': 1  };
 var bundleNames = {
   'single':       'Single Mat',
@@ -1187,6 +1192,12 @@ function openOrder(preselect) {
   if (!anyOn) {
     var firstMcol = document.querySelector('.mcol[data-val="Black"]');
     if (firstMcol) firstMcol.classList.add('on');
+  }
+  // Ensure photo matches current selection
+  var selectedMcol = document.querySelector('.mcol.on');
+  var matPhoto = document.getElementById('matPhoto');
+  if (selectedMcol && matPhoto) {
+    matPhoto.src = selectedMcol.getAttribute('data-photo') || '/mat-black.jpeg';
   }
   document.getElementById('oFormInner').style.display = '';
   document.getElementById('oConfirm').style.display   = 'none';
@@ -1283,34 +1294,43 @@ function pickSymbol(el) {
 function selectModalColor(el) {
   document.querySelectorAll('.mcol').forEach(function(c) { c.classList.remove('on'); });
   el.classList.add('on');
-  // Sync preview mat (if visible on page)
+
+  // Swap the real mat photo
+  var photo = el.getAttribute('data-photo');
+  var img   = document.getElementById('matPhoto');
+  if (img && photo) {
+    img.style.opacity = '0';
+    setTimeout(function() {
+      img.src = photo;
+      img.style.opacity = '1';
+    }, 150);
+  }
+
+  // Sync the SVG preview mat on the page (colour map for SVG preview)
   var colorMap = {
-    'Black': { c1:'#0A0A0A', c2:'#060606', st:'#C8C0A8', ta:'#C8C0A8' },
-    'Grey':  { c1:'#888888', c2:'#444444', st:'#bbbbbb', ta:'#999999' },
-    'Green': { c1:'#0d7a5a', c2:'#094d38', st:'#2aaa80', ta:'#1a8866' },
-    'Blue':  { c1:'#1a2fa8', c2:'#0a1866', st:'#4466dd', ta:'#2244cc' },
-    'Pink':  { c1:'#a05060', c2:'#6a2838', st:'#c47a8a', ta:'#b06070' },
-    'Red':   { c1:'#c01a2a', c2:'#6a0a14', st:'#e85060', ta:'#e85060' }
+    'Black':        { c1:'#0A0A0A', c2:'#060606', st:'#C8C0A8', ta:'#C8C0A8' },
+    'Grey-Purple':  { c1:'#6a5a78', c2:'#3a2a48', st:'#b0a0c0', ta:'#9a8ab0' },
+    'Pink':         { c1:'#a05060', c2:'#6a2838', st:'#c47a8a', ta:'#b06070' },
+    'Deyal Purple': { c1:'#5a1a8a', c2:'#2a0050', st:'#9050d0', ta:'#7030a0' },
+    'Royal Blue':   { c1:'#1a2fa8', c2:'#0a1866', st:'#4466dd', ta:'#2244cc' },
+    'Burgundy':     { c1:'#7a1010', c2:'#3a0404', st:'#c04040', ta:'#a02020' }
   };
   var val = el.getAttribute('data-val');
   var cm  = colorMap[val];
-  if (!cm) return;
-  var ps1 = document.getElementById('ps1');
-  var ps2 = document.getElementById('ps2');
-  if (ps1) ps1.setAttribute('stop-color', cm.c1);
-  if (ps2) ps2.setAttribute('stop-color', cm.c2);
-  ['pF1','pF3','pAO','pAI'].forEach(function(id) {
-    var el2 = document.getElementById(id);
-    if (el2) el2.setAttribute('stroke', cm.st);
-  });
-  var pDia  = document.getElementById('pDia');
-  var pName = document.getElementById('pName');
-  if (pDia)  pDia.setAttribute('fill', cm.ta);
-  if (pName) pName.setAttribute('fill', cm.st);
-  // Also sync the preview swatches on the page
-  document.querySelectorAll('.sw').forEach(function(s) { s.classList.remove('on'); });
-  var titleToSync = { 'Black':'Black','Grey':'Grey','Green':'Green','Blue':'Blue','Pink':'Pink','Red':'Red' };
-  document.querySelectorAll('.sw[title="' + titleToSync[val] + '"]').forEach(function(s) { s.classList.add('on'); });
+  if (cm) {
+    var ps1 = document.getElementById('ps1');
+    var ps2 = document.getElementById('ps2');
+    if (ps1) ps1.setAttribute('stop-color', cm.c1);
+    if (ps2) ps2.setAttribute('stop-color', cm.c2);
+    ['pF1','pF3','pAO','pAI'].forEach(function(id) {
+      var el2 = document.getElementById(id);
+      if (el2) el2.setAttribute('stroke', cm.st);
+    });
+    var pDia  = document.getElementById('pDia');
+    var pName = document.getElementById('pName');
+    if (pDia)  pDia.setAttribute('fill', cm.ta);
+    if (pName) pName.setAttribute('fill', cm.st);
+  }
 }
 
 function getSelectedSymbols() {
@@ -1352,14 +1372,17 @@ function fillSummary() {
   document.getElementById('sTotal').textContent = base ? '$' + total : '&mdash;';
 }
 
-// ── STRIPE CONFIG ─────────────────────────────────────
-var STRIPE_PK = 'pk_test_51TEblHEfCdzLL0d8DS3AmBj9hWcRN8EBIpf8fv2xID0vzxJURKmb44Fmi8jCFgGH1Hlt16ERuRebPYzRtp3g0lHa00Bt4oQflt';
-var stripePrices = {
-  'single':       'price_1TEbu7EfCdzLL0d8AtQ31yu9',
-  'duo':          'price_1TEbupEfCdzLL0d8PUQa7U41',
-  'family':       'price_1TEbxeEfCdzLL0d8FHJrTKfr',
-  'tesbih':       'price_1TEbyCEfCdzLL0d8z3a2j39N'
-};
+// ── PRICING CALC (uses basePrices + matCounts defined above) ──────────────────
+function calcTotal(bundle, namesArr, symsArr) {
+  var base  = basePrices[bundle]  || 0;
+  var mats  = matCounts[bundle]   || 1;
+  var extra = 0;
+  for (var i = 0; i < mats; i++) {
+    if (namesArr[i] && namesArr[i].trim()) extra += 7;
+    if (symsArr[i]  && symsArr[i] !== 'none') extra += 3;
+  }
+  return base + extra;
+}
 
 function submitOrder() {
   var name    = document.getElementById('oCustomerName').value.trim();
@@ -1385,18 +1408,22 @@ function submitOrder() {
     return;
   }
 
-  var b       = document.getElementById('oBundle').value;
-  var priceId = stripePrices[b];
-  if (!priceId) { alert('Please go back and select a product.'); return; }
+  var b = document.getElementById('oBundle').value;
+  if (!basePrices[b]) { alert('Please go back and select a product.'); return; }
 
-  var colorEl = document.querySelector('.mcol.on');
-  var color   = colorEl ? colorEl.getAttribute('data-val') : '';
-  var names   = Array.from(document.querySelectorAll('.name-inp')).map(function(n) { return n.value.trim(); }).filter(Boolean);
-  var syms    = getSelectedSymbols().map(function(s,i) { return s !== 'none' ? 'Mat'+(i+1)+':'+s : ''; }).filter(Boolean);
-  var thread  = document.getElementById('oThread').value;
-  var phone   = document.getElementById('oPhone').value.trim();
-  var notes   = document.getElementById('oNotes').value.trim();
-  var occasion= document.getElementById('oOccasion').value;
+  var colorEl  = document.querySelector('.mcol.on');
+  var color    = colorEl ? colorEl.getAttribute('data-val') : '';
+  var allNames = Array.from(document.querySelectorAll('.name-inp')).map(function(n) { return n.value.trim(); });
+  var names    = allNames.filter(Boolean);
+  var allSyms  = getSelectedSymbols();
+  var syms     = allSyms.map(function(s,i) { return s !== 'none' ? 'Mat'+(i+1)+':'+s : ''; }).filter(Boolean);
+  var thread   = document.getElementById('oThread').value;
+  var phone    = document.getElementById('oPhone').value.trim();
+  var notes    = document.getElementById('oNotes').value.trim();
+  var occasion = document.getElementById('oOccasion').value;
+
+  var totalDollars = calcTotal(b, allNames, allSyms);
+  var totalCents   = totalDollars * 100;
 
   // Disable button and show loading state
   var btn = document.getElementById('oSubmit');
@@ -1408,13 +1435,14 @@ function submitOrder() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      priceId:      priceId,
+      amountCents:  totalCents,
+      bundleName:   b,
       email:        email,
       customerName: name,
-      matName1:     names[0] || '',
-      matName2:     names[1] || '',
-      matName3:     names[2] || '',
-      matName4:     names[3] || '',
+      matName1:     allNames[0] || '',
+      matName2:     allNames[1] || '',
+      matName3:     allNames[2] || '',
+      matName4:     allNames[3] || '',
       symbol:       syms.join(', '),
       color:        color,
       address:      address,
