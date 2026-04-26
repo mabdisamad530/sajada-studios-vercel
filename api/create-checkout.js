@@ -3,24 +3,21 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // ── Bundle base prices (dollars) ──────────────────────────────────────────────
 const BASE_PRICES = {
   single:  35,
-  duo:     80,
-  family: 110,
-  tesbih:  50
+  duo:     65,
+  family: 110
 };
 
 // ── How many mat slots each bundle has ────────────────────────────────────────
 const MAT_COUNT = {
   single: 1,
   duo:    2,
-  family: 4,
-  tesbih: 1
+  family: 4
 };
 
 const BUNDLE_LABELS = {
   single: 'Single Prayer Mat',
   duo:    'Duo Set (2 Mats)',
-  family: 'Family Set (4 Mats)',
-  tesbih: 'Mat + Tesbih'
+  family: 'Family Set (4 Mats)'
 };
 
 // ── Add-on prices (dollars) ───────────────────────────────────────────────────
@@ -51,7 +48,7 @@ function parseSymbols(symbolStr) {
  * Build the Stripe line_items array.
  * One item for the base bundle, then individual add-on items per mat.
  */
-function buildLineItems(bundleName, matNames, symbolStr) {
+function buildLineItems(bundleName, matNames, symbolStr, addTasbih) {
   const mats    = MAT_COUNT[bundleName]   || 1;
   const symbols = parseSymbols(symbolStr);
   const items   = [];
@@ -105,6 +102,21 @@ function buildLineItems(bundleName, matNames, symbolStr) {
     }
   }
 
+  // ── 3. Tasbih add-on ────────────────────────────────────────────────────────
+  if (addTasbih) {
+    items.push({
+      price_data: {
+        currency: 'usd',
+        unit_amount: 500,
+        product_data: {
+          name: 'Colour-Matched Tasbih Add-on',
+          description: 'Handcrafted tasbih matching your mat colour'
+        }
+      },
+      quantity: 1
+    });
+  }
+
   return items;
 }
 
@@ -118,7 +130,7 @@ module.exports = async function handler(req, res) {
     const {
       bundleName, email, customerName,
       matName1, matName2, matName3, matName4,
-      symbol, color, address, phone, thread, occasion, notes,
+      symbol, color, address, phone, thread, occasion, notes, tasbih,
       successUrl, cancelUrl
     } = req.body;
 
@@ -136,7 +148,8 @@ module.exports = async function handler(req, res) {
     ];
 
     // ── Build itemised line items ─────────────────────────────────────────────
-    const lineItems = buildLineItems(bundleName, matNames, symbol || '');
+    const addTasbih = tasbih === 'yes';
+    const lineItems = buildLineItems(bundleName, matNames, symbol || '', addTasbih);
 
     // ── Sanity-check: server total must agree with what frontend calculated ───
     // (belt-and-suspenders; Stripe charges the sum of line items, not amountCents)
@@ -166,7 +179,8 @@ module.exports = async function handler(req, res) {
         phone:        phone        || '',
         thread:       thread       || '',
         occasion:     occasion     || '',
-        notes:        (notes       || '').substring(0, 100)
+        notes:        (notes       || '').substring(0, 100),
+        tasbih:       tasbih === 'yes' ? 'yes' : 'no'
       },
 
       success_url: successUrl || `${req.headers.origin}/`,
