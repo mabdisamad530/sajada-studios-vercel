@@ -470,8 +470,9 @@ footer{background:var(--ivory);border-top:1px solid var(--line);padding:3.5rem 5
   </div>
   <div class="coll-scroll">
     <div class="col-c">
-      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;">
-        <img src="/mat-black.jpeg" alt="Black prayer mat" style="width:100%;height:100%;object-fit:cover;display:block;"/>
+      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;position:relative;">
+        <img src="/mat-black.jpeg" alt="Black prayer mat" class="col-img-main" style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity .35s;"/>
+        <img src="/box-black.jpeg" alt="Black prayer mat in box" class="col-img-hover" style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;opacity:0;transition:opacity .35s;"/>
       </div>
       <div class="col-ov">
         <div class="col-tag">Classic</div>
@@ -481,8 +482,9 @@ footer{background:var(--ivory);border-top:1px solid var(--line);padding:3.5rem 5
       </div>
     </div>
     <div class="col-c">
-      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;">
-        <img src="/mat-royal-blue.jpeg" alt="Royal Blue prayer mat" style="width:100%;height:100%;object-fit:cover;display:block;"/>
+      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;position:relative;">
+        <img src="/mat-royal-blue.jpeg" alt="Royal Blue prayer mat" class="col-img-main" style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity .35s;"/>
+        <img src="/box-royal-blue.jpeg" alt="Royal Blue prayer mat in box" class="col-img-hover" style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;opacity:0;transition:opacity .35s;"/>
       </div>
       <div class="col-ov">
         <div class="col-tag">Bestseller</div>
@@ -492,8 +494,9 @@ footer{background:var(--ivory);border-top:1px solid var(--line);padding:3.5rem 5
       </div>
     </div>
     <div class="col-c">
-      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;">
-        <img src="/mat-grey-purple.jpeg" alt="Grey Purple prayer mat" style="width:100%;height:100%;object-fit:cover;display:block;"/>
+      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;position:relative;">
+        <img src="/mat-grey-purple.jpeg" alt="Grey Purple prayer mat" class="col-img-main" style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity .35s;"/>
+        <img src="/box-grey-purple.jpeg" alt="Grey Purple prayer mat in box" class="col-img-hover" style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;opacity:0;transition:opacity .35s;"/>
       </div>
       <div class="col-ov">
         <div class="col-tag">New</div>
@@ -503,8 +506,9 @@ footer{background:var(--ivory);border-top:1px solid var(--line);padding:3.5rem 5
       </div>
     </div>
     <div class="col-c">
-      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;">
-        <img src="/mat-pink.jpeg" alt="Pink prayer mat" style="width:100%;height:100%;object-fit:cover;display:block;"/>
+      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;position:relative;">
+        <img src="/mat-pink.jpeg" alt="Pink prayer mat" class="col-img-main" style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity .35s;"/>
+        <img src="/box-pink.jpeg" alt="Pink prayer mat in box" class="col-img-hover" style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;opacity:0;transition:opacity .35s;"/>
       </div>
       <div class="col-ov">
         <div class="col-tag">Popular</div>
@@ -514,8 +518,9 @@ footer{background:var(--ivory);border-top:1px solid var(--line);padding:3.5rem 5
       </div>
     </div>
     <div class="col-c">
-      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;">
-        <img src="/mat-deyal-purple.jpeg" alt="Deyal Purple prayer mat" style="width:100%;height:100%;object-fit:cover;display:block;"/>
+      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;position:relative;">
+        <img src="/mat-deyal-purple.jpeg" alt="Deyal Purple prayer mat" class="col-img-main" style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity .35s;"/>
+        <img src="/box-deyal-purple.jpeg" alt="Deyal Purple prayer mat in box" class="col-img-hover" style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;opacity:0;transition:opacity .35s;"/>
       </div>
       <div class="col-ov">
         <div class="col-tag">Limited</div>
@@ -525,8 +530,9 @@ footer{background:var(--ivory);border-top:1px solid var(--line);padding:3.5rem 5
       </div>
     </div>
     <div class="col-c">
-      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;">
-        <img src="/mat-burgundy.jpeg" alt="Burgundy prayer mat" style="width:100%;height:100%;object-fit:cover;display:block;"/>
+      <div class="mw" style="background:var(--sand);padding:0;overflow:hidden;position:relative;">
+        <img src="/mat-burgundy.jpeg" alt="Burgundy prayer mat" class="col-img-main" style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity .35s;"/>
+        <img src="/box-burgundy.jpeg" alt="Burgundy prayer mat in box" class="col-img-hover" style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;opacity:0;transition:opacity .35s;"/>
       </div>
       <div class="col-ov">
         <div class="col-tag">New</div>
@@ -1398,6 +1404,20 @@ function submitOrder() {
   }
 })();
 
+// ── PRODUCT CARD HOVER IMAGE SWAP ─────────────────────────────────────────────
+document.querySelectorAll('.col-c').forEach(function(card) {
+  var hover = card.querySelector('.col-img-hover');
+  var main  = card.querySelector('.col-img-main');
+  if (!hover || !main) return;
+  card.addEventListener('mouseenter', function() {
+    hover.style.opacity = '1';
+    main.style.opacity  = '0';
+  });
+  card.addEventListener('mouseleave', function() {
+    hover.style.opacity = '0';
+    main.style.opacity  = '1';
+  });
+});
 
 </script>
 </body>
